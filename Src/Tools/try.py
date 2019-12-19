@@ -1,7 +1,7 @@
 import os
 import sys
+import re
+from functions import get_int_after, getip
 
-print("=== 获取当前文件上层目录 ===")
-path = os.path.abspath(os.path.join(os.getcwd(), "..", ".."))
-path += "/Data"
-print(path)
+a = [1] * 10
+print(a)

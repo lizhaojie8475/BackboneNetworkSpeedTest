@@ -6,22 +6,8 @@ def get_int_after(s, f):  # 提取某字符后的int，s为目标字符串，f�
 
     S = s.upper()
     F = f.upper()
-    par = S.partition(F)
-    int_str = ""
-    for c in par[2]:
-        if c in ("-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
-            int_str += c
-        else:
-            if c == ":" or c == "=" or c == " ":
-                if int_str == "":
-                    continue
-            break
-    try:
-        return int(int_str)
-    except:
-        print("Get Int After Fail")
-        print(f, s)
-        return "Parsing error"
+    ans = re.findall(r"\b%s=(\d+(?:\.\d+)?)\b"%(F, ), S)
+    return ans
 
 
 def get_str_btw(s, f, b):  # 获取两个字符之间的内容，s为目标字符串，f、b为两个字符
