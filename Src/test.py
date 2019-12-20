@@ -11,11 +11,13 @@ if __name__ == "__main__":
     fileList = filter(lambda file: file.startswith("data") and file.endswith(".txt"), fileList)
     fileList = list(fileList)
 
+    command = sys.argv[1]
+
     for file in fileList:
         file = dirPath + "/" + file
         helper = MySqlHelper()
         helper.connect()
-        t = threading.Thread(target=readFile, args=(file, helper))
+        t = threading.Thread(target=readFile, args=(file, helper, command))
         thread.append(t)
 
     for i in thread:

@@ -3,5 +3,7 @@ import sys
 import re
 from functions import get_int_after, getip
 
-a = [1] * 10
-print(a)
+str = ""
+sss = str.split(";")
+print(len(sss))
+print(sss[0]=="")

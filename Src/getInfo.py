@@ -5,6 +5,7 @@ import socket
 from Tools.MySQLHelper import MySqlHelper
 import numpy as np
 
+
 def insertDB(foundation, routers, sourceIP, helper):
     targetIP = foundation[0]
     TTL = foundation[1]
@@ -15,7 +16,7 @@ def insertDB(foundation, routers, sourceIP, helper):
 
     sql = "INSERT INTO trace_route VALUES (%s, %s, %s, %s, %s, %s)"
     helper.insert(sql, targetIP, sourceIP, TTL, time, routers, stability)
-    helper.close()
+
 
 def updateDB(foundation, routers_new, helper, tableName = "trace_route"):
     targetIP = foundation[0]
@@ -31,24 +32,32 @@ def updateDB(foundation, routers_new, helper, tableName = "trace_route"):
     routers_old = routers_old[0]
     routers_old = routers_old.split(";")
 
-    stability = helper.search(stability_sql)
-    stability = np.array(stability)
-    stability = stability[:, 0]
-    stability = stability[0]
-    stability = stability.split(";")
-    stability = list(map(lambda s: int(s), stability))
+    if len(routers_old) == 0 or (len(routers_old) == 1 and routers_old[0] == ""):
+        stability = ";".join(["1"] * len(routers_new))
+        routers = ";".join(routers_new)
+        fieldList = ["TTL", "time", "stability", "routers"]
+        valueList = [TTL, time, stability, routers]
+        helper.update(fieldList, valueList, "trace_route", "target_ip", targetIP)
+    else:
+        stability = helper.search(stability_sql)
+        stability = np.array(stability)
+        stability = stability[:, 0]
+        stability = stability[0]
+        stability = stability.split(";")
+        stability = list(map(lambda s: int(s), stability))
 
-    for i, router in enumerate(routers_old):
-        if router in routers_new:
-            stability[i] += 1
-    stability = list(map(lambda s: str(s), stability))
-    stability = ";".join(stability)
+        for i, router in enumerate(routers_old):
+            if router in routers_new:
+                stability[i] += 1
+        stability = list(map(lambda s: str(s), stability))
+        stability = ";".join(stability)
 
-    fieldList = ["TTL", "time", "stability"]
-    valueList = [TTL, time, stability]
-    helper.update(fieldList, valueList, "trace_route", "target_ip", targetIP)
+        fieldList = ["TTL", "time", "stability"]
+        valueList = [TTL, time, stability]
+        helper.update(fieldList, valueList, "trace_route", "target_ip", targetIP)
 
-def getInfo(ip, helper):
+
+def getInfo(ip, helper, command):
     foundation = ping(ip)
     routers = tracert(ip)
     sourceIp = socket.gethostbyname(socket.gethostname())
@@ -57,5 +66,8 @@ def getInfo(ip, helper):
     # print("routers: ", routers[:5])
     # print(sourceIp)
     # print("-----------------------------------------------------", "\n")
-    # insertDB(foundation, routers, sourceIp, helper)
-    updateDB(foundation, routers, helper)
+
+    if command == "insert":
+        insertDB(foundation, routers, sourceIp, helper)
+    elif command == "update":
+        updateDB(foundation, routers, helper)
